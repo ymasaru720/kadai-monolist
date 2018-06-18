@@ -1,7 +1,10 @@
- use \App\Item;
+<?php
+namespace App\Http\Controllers;
+use App\Http\Controllers\Controller;
+use App\Item;
 
   class ItemsController extends Controller
-  {
+ {
 
     public function create()
     {
@@ -9,14 +12,14 @@
         $items = [];
         if ($keyword) {
             $client = new \RakutenRws_Client();
-            $client->setApplicationId(env('RAKUTEN_APPLICATION_ID'));
+            $client->setApplicationId(env('RAKUTEN_API_ID'));
 
             $rws_response = $client->execute('IchibaItemSearch', [
                 'keyword' => $keyword,
                 'imageFlag' => 1,
                 'hits' => 20,
             ]);
-
+          
             // Creating "Item" instance to make it easy to handle.（not saving）
             foreach ($rws_response->getData()['Items'] as $rws_item) {
                 $item = new Item();
@@ -33,4 +36,15 @@
             'items' => $items,
         ]);
     }
-  }
+    
+        public function show($id)
+    {
+      $item = Item::find($id);
+      $want_users = $item->want_users;
+
+      return view('items.show', [
+          'item' => $item,
+          'want_users' => $want_users,
+      ]);
+    }
+ }
